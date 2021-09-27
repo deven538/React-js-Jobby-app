@@ -89,3 +89,42 @@
   font-weight: 500;
   font-family: 'Roboto';
 }
+
+.aa {
+  color: #ffffff;
+}
+
+.input-edit-container {
+  font-size: 15px;
+  height: 40px;
+  border: 1px solid #6366f1;
+  background-color: transparent;
+  color: #ffffff;
+  border-radius: 2px;
+  margin-top: 5px;
+  padding: 8px 16px 8px 16px;
+  outline: none;
+  width: 30%;
+  margin-left: 37px;
+  margin-top: 24px;
+}
+
+.jobs-input-search-jobs-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.input-search-icon-container {
+  display: flex;
+  justify-content: flex-start;
+}
+
+.search-icon-edit {
+  font-size: 15px;
+  height: 40px;
+  border: 1px solid #6366f1;
+  background-color: transparent;
+  color: #ffffff;
+  border-radius: 2px;
+  margin-top: 24px;
+}

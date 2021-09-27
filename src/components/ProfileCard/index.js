@@ -58,7 +58,7 @@ class ProfileCard extends Component {
 
     return (
       <div className="profile-card-container">
-        <img src={profileImageUrl} className="image-edit" alt="avatar" />
+        <img src={profileImageUrl} className="image-edit" alt="profile" />
         <h1 className="profile-user-name">{name}</h1>
         <p className="profile-user-description">{shortBio}</p>
       </div>
@@ -77,7 +77,11 @@ class ProfileCard extends Component {
 
   renderFailureView = () => (
     <div className="Retry-button">
-      <button className="retry-button" onClick={this.onClickRetry}>
+      <button
+        className="retry-button"
+        onClick={this.onClickRetry}
+        type="button"
+      >
         Retry
       </button>
     </div>

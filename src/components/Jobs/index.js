@@ -1,8 +1,10 @@
 import {Component} from 'react'
 import Cookies from 'js-cookie'
 import Loader from 'react-loader-spinner'
+import {AiOutlineSearch} from 'react-icons/ai'
 
 import Header from '../Header'
+import JobsList from '../JobsList'
 import FilterGroup from '../FilterGroup'
 
 import './index.css'
@@ -54,10 +56,10 @@ const apiStatusConstants = {
 
 class Jobs extends Component {
   state = {
-    jobsList: [],
+    newJobsList: [],
     apiStatus: apiStatusConstants.initial,
     employeeType: '',
-    minimumSalary: 'a',
+    minimumSalary: '',
     searchInput: '',
   }
 
@@ -92,8 +94,9 @@ class Jobs extends Component {
         rating: eachJob.rating,
         title: eachJob.title,
       }))
+      // console.log(updatedJobsData)
       this.setState({
-        jobsList: updatedJobsData,
+        newJobsList: updatedJobsData,
         apiStatus: apiStatusConstants.success,
       })
     } else {
@@ -112,11 +115,11 @@ class Jobs extends Component {
       />
       <h1 className="jobs-failure-heading-text">Oops! Something Went Wrong</h1>
       <p className="jobs-failure-description">
-        We cannot seem to find page you are looking for.
+        We cannot seem to find the page you are looking for
       </p>
       <button
         type="button"
-        testid="button"
+        testid="searchButton"
         className="jobs-failure-button"
         onClick={this.getJobs}
       >
@@ -131,12 +134,45 @@ class Jobs extends Component {
     </div>
   )
 
+  getSearchedJobs = () => {
+    this.getJobs()
+  }
+
+  changeSearchInput = event => {
+    this.setState({searchInput: event.target.value})
+  }
+
+  renderSuccessView = () => {
+    const {newJobsList} = this.state
+    return (
+      <div className="jobs-input-search-jobs-list">
+        <div className="input-search-icon-container">
+          <input
+            type="search"
+            className="input-edit-container"
+            placeholder="search"
+            onChange={this.changeSearchInput}
+          />
+          <AiOutlineSearch
+            className="search-icon-edit"
+            onClick={this.getSearchedJobs}
+          />
+        </div>
+        <ul className="jobs-list">
+          {newJobsList.map(job => (
+            <JobsList jobData={job} key={job.id} />
+          ))}
+        </ul>
+      </div>
+    )
+  }
+
   renderAllJobs = () => {
     const {apiStatus} = this.state
 
     switch (apiStatus) {
       case apiStatusConstants.success:
-        return null
+        return this.renderSuccessView()
       case apiStatusConstants.failure:
         return this.renderFailureView()
       case apiStatusConstants.inProgress:
@@ -146,7 +182,12 @@ class Jobs extends Component {
     }
   }
 
+  changeSalary = minimumSalary => {
+    this.setState({minimumSalary}, this.getJobs())
+  }
+
   render() {
+    const {minimumSalary} = this.state
     return (
       <>
         <Header />
@@ -154,6 +195,8 @@ class Jobs extends Component {
           <FilterGroup
             employmentTypesList={employmentTypesList}
             salaryRangesList={salaryRangesList}
+            changeSalary={this.changeSalary}
+            minimumSalary={minimumSalary}
           />
           {this.renderAllJobs()}
         </div>

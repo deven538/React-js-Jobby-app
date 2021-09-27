@@ -34,10 +34,11 @@ const FilterGroup = props => {
   )
 
   const renderSalaries = () => {
-    const {salaryRangesList} = props
+    const {salaryRangesList, minimumSalary, changeSalary} = props
 
     return salaryRangesList.map(category => {
       const {salaryRangeId, label} = salaryRangesList
+      const onClickSalary = () => changeSalary(minimumSalary)
 
       return (
         <li className="list-item" key={category.salaryRangeId}>
@@ -46,6 +47,7 @@ const FilterGroup = props => {
             id={category.salaryRangeId}
             name="salary"
             className="check-box-edit"
+            onClick={onClickSalary}
           />
           <label htmlFor={category.salaryRangeId} className="label-name">
             {category.label}
