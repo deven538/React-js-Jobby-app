@@ -1,12 +1,10 @@
 import {Component} from 'react'
 import Cookies from 'js-cookie'
 import Loader from 'react-loader-spinner'
-import {AiOutlineSearch} from 'react-icons/ai'
-
+import {BsSearch} from 'react-icons/bs'
 import Header from '../Header'
-import JobsList from '../JobsList'
-import FilterGroup from '../FilterGroup'
-
+import FiltersGroup from '../FiltersGroup'
+import JobCard from '../JobCard'
 import './index.css'
 
 const employmentTypesList = [
@@ -56,10 +54,10 @@ const apiStatusConstants = {
 
 class Jobs extends Component {
   state = {
-    newJobsList: [],
+    jobsList: [],
     apiStatus: apiStatusConstants.initial,
-    employeeType: '',
-    minimumSalary: '',
+    employeeType: [],
+    minimumSalary: 0,
     searchInput: '',
   }
 
@@ -72,7 +70,7 @@ class Jobs extends Component {
       apiStatus: apiStatusConstants.inProgress,
     })
     const {employeeType, minimumSalary, searchInput} = this.state
-    const apiUrl = `https://apis.ccbp.in/jobs?employment_type=${employeeType}&minimum_package=${minimumSalary}&search=${searchInput}`
+    const apiUrl = `https://apis.ccbp.in/jobs?employment_type=${employeeType.join()}&minimum_package=${minimumSalary}&search=${searchInput}`
     const jwtToken = Cookies.get('jwt_token')
 
     const options = {
@@ -94,9 +92,8 @@ class Jobs extends Component {
         rating: eachJob.rating,
         title: eachJob.title,
       }))
-      // console.log(updatedJobsData)
       this.setState({
-        newJobsList: updatedJobsData,
+        jobsList: updatedJobsData,
         apiStatus: apiStatusConstants.success,
       })
     } else {
@@ -104,6 +101,33 @@ class Jobs extends Component {
         apiStatus: apiStatusConstants.failure,
       })
     }
+  }
+
+  renderJobsList = () => {
+    const {jobsList} = this.state
+    const renderJobsList = jobsList.length > 0
+
+    return renderJobsList ? (
+      <div className="all-jobs-container">
+        <ul className="jobs-list">
+          {jobsList.map(job => (
+            <JobCard jobData={job} key={job.id} />
+          ))}
+        </ul>
+      </div>
+    ) : (
+      <div className="no-jobs-view">
+        <img
+          src="https://assets.ccbp.in/frontend/react-js/no-jobs-img.png"
+          className="no-jobs-img"
+          alt="no jobs"
+        />
+        <h1 className="no-jobs-heading">No Jobs Found</h1>
+        <p className="no-jobs-description">
+          We could not find any jobs. Try other filters.
+        </p>
+      </div>
+    )
   }
 
   renderFailureView = () => (
@@ -119,7 +143,7 @@ class Jobs extends Component {
       </p>
       <button
         type="button"
-        testid="searchButton"
+        testid="button"
         className="jobs-failure-button"
         onClick={this.getJobs}
       >
@@ -134,45 +158,12 @@ class Jobs extends Component {
     </div>
   )
 
-  getSearchedJobs = () => {
-    this.getJobs()
-  }
-
-  changeSearchInput = event => {
-    this.setState({searchInput: event.target.value})
-  }
-
-  renderSuccessView = () => {
-    const {newJobsList} = this.state
-    return (
-      <div className="jobs-input-search-jobs-list">
-        <div className="input-search-icon-container">
-          <input
-            type="search"
-            className="input-edit-container"
-            placeholder="search"
-            onChange={this.changeSearchInput}
-          />
-          <AiOutlineSearch
-            className="search-icon-edit"
-            onClick={this.getSearchedJobs}
-          />
-        </div>
-        <ul className="jobs-list">
-          {newJobsList.map(job => (
-            <JobsList jobData={job} key={job.id} />
-          ))}
-        </ul>
-      </div>
-    )
-  }
-
   renderAllJobs = () => {
     const {apiStatus} = this.state
 
     switch (apiStatus) {
       case apiStatusConstants.success:
-        return this.renderSuccessView()
+        return this.renderJobsList()
       case apiStatusConstants.failure:
         return this.renderFailureView()
       case apiStatusConstants.inProgress:
@@ -182,23 +173,65 @@ class Jobs extends Component {
     }
   }
 
-  changeSalary = minimumSalary => {
-    this.setState({minimumSalary}, this.getJobs())
+  changeSearchInput = event => {
+    this.setState({searchInput: event.target.value})
+  }
+
+  onEnterSearchInput = event => {
+    if (event.key === 'Enter') {
+      this.getJobs()
+    }
+  }
+
+  changeSalary = salary => {
+    this.setState({minimumSalary: salary}, this.getJobs)
+  }
+
+  changeEmployeeList = type => {
+    this.setState(
+      prev => ({employeeType: [...prev.employeeType, type]}),
+      this.getJobs,
+    )
   }
 
   render() {
-    const {minimumSalary} = this.state
+    const {searchInput} = this.state
+
     return (
       <>
         <Header />
         <div className="jobs-container">
-          <FilterGroup
-            employmentTypesList={employmentTypesList}
-            salaryRangesList={salaryRangesList}
-            changeSalary={this.changeSalary}
-            minimumSalary={minimumSalary}
-          />
-          {this.renderAllJobs()}
+          <div className="jobs-content">
+            <FiltersGroup
+              employmentTypesList={employmentTypesList}
+              salaryRangesList={salaryRangesList}
+              changeSearchInput={this.changeSearchInput}
+              searchInput={searchInput}
+              getJobs={this.getJobs}
+              changeSalary={this.changeSalary}
+              changeEmployeeList={this.changeEmployeeList}
+            />
+            <div className="search-input-jobs-list-container">
+              <div className="search-input-container-desktop">
+                <input
+                  type="search"
+                  className="search-input-desktop"
+                  placeholder="Search"
+                  onChange={this.changeSearchInput}
+                  onKeyDown={this.onEnterSearchInput}
+                />
+                <button
+                  type="button"
+                  testid="searchButton"
+                  className="search-button-container-desktop"
+                  onClick={this.getJobs}
+                >
+                  <BsSearch className="search-icon-desktop" />
+                </button>
+              </div>
+              {this.renderAllJobs()}
+            </div>
+          </div>
         </div>
       </>
     )
